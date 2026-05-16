@@ -486,7 +486,7 @@
       try {
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: window.location.origin + window.location.pathname }
+          options: { emailRedirectTo: window.location.origin }
         });
         if (error) throw error;
         msg.innerHTML = `Check <strong style="color:var(--mint)">${escapeHtml(email)}</strong> for a magic link.`;
