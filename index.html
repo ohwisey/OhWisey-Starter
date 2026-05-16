@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Oh Wisey</title>
+  <style>
+    :root {
+      --bg: #000;
+
+      --surface-1:    rgba(20, 20, 22, 0.6);
+      --surface-2:    rgba(255, 255, 255, 0.04);
+      --surface-3:    rgba(255, 255, 255, 0.08);
+      --border-soft:  rgba(255, 255, 255, 0.06);
+      --border:       rgba(255, 255, 255, 0.10);
+      --border-hover: rgba(255, 255, 255, 0.16);
+
+      --text:   rgba(255, 255, 255, 0.95);
+      --text-2: rgba(255, 255, 255, 0.60);
+      --text-3: rgba(255, 255, 255, 0.40);
+      --text-4: rgba(255, 255, 255, 0.25);
+
+      --mint:      #3ecf8e;
+      --mint-soft: rgba(62, 207, 142, 0.10);
+      --mint-glow: rgba(62, 207, 142, 0.45);
+      --amber:     #fbbf24;
+      --red:       #f87171;
+
+      --radius-sheet: 28px;
+      --radius-sm:    12px;
+
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-feature-settings: "kern", "liga", "ss01";
+      letter-spacing: -0.011em;
+      min-height: 100vh;
+    }
+
+    body {
+      background-color: #000;
+      background-image:
+        radial-gradient(ellipse 75% 55% at 50% -12%, rgba(62, 207, 142, 0.22) 0%, rgba(62, 207, 142, 0.08) 35%, transparent 65%),
+        radial-gradient(circle 700px at 95% 100%, rgba(62, 207, 142, 0.04) 0%, transparent 65%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wrap {
+      flex: 1;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+
+    /* ── Gear (fixed top-right) ─────────────────────────────── */
+    .gear {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--border-soft);
+      color: var(--text-2);
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s var(--ease);
+      font-family: inherit;
+      z-index: 10;
+    }
+    .gear:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-hover);
+    }
+    .gear:active { transform: scale(0.94); }
+
+    /* ── Greeting / date ────────────────────────────────────── */
+    .greeting {
+      font-size: 44px;
+      font-weight: 500;
+      letter-spacing: -0.028em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .date-line {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-3);
+      letter-spacing: -0.005em;
+    }
+
+    /* ── Sheet ──────────────────────────────────────────────── */
+    .sheet {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 48px;
+      text-align: left;
+      background: rgba(20, 20, 22, 0.78);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sheet);
+      padding: 28px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+    .sheet h3 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.018em;
+      margin-bottom: 8px;
+    }
+    .sheet .sub {
+      font-size: 13.5px;
+      color: var(--text-3);
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+    .sheet .sub a { color: var(--mint); text-decoration: none; }
+    .sheet .sub a:hover { text-decoration: underline; }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      padding: 13px 15px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s var(--ease);
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--mint);
+      background: rgba(62, 207, 142, 0.04);
+    }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .btn-primary {
+      background: var(--mint);
+      color: #000;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 13px 22px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      letter-spacing: -0.008em;
+      transition: all 0.3s var(--ease);
+    }
+    .btn-primary:hover { box-shadow: 0 0 24px var(--mint-glow); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .btn-neutral {
+      background: var(--surface-3);
+      color: var(--text);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 13px 18px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s var(--ease);
+    }
+    .btn-neutral:hover { background: rgba(255, 255, 255, 0.12); }
+    .btn-neutral:active { transform: scale(0.97); }
+
+    .settings-block { margin-bottom: 26px; }
+    .settings-block:last-child { margin-bottom: 0; }
+    .settings-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-4);
+      margin-bottom: 14px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .sync-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      transition: all 0.3s var(--ease);
+      flex-shrink: 0;
+    }
+    .sync-dot.configured {
+      background: rgba(62, 207, 142, 0.45);
+      animation: pulse 2.2s infinite;
+    }
+    .sync-dot.syncing { background: var(--amber); }
+    .sync-dot.synced  { background: var(--mint); box-shadow: 0 0 10px var(--mint-glow); }
+    .sync-dot.error   { background: var(--red); }
+    @keyframes pulse { 0%, 100% { opacity: 0.55 } 50% { opacity: 1 } }
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 22, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--border-soft);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.3s var(--ease);
+      pointer-events: none;
+      z-index: 50;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { color: var(--red); border-color: rgba(248, 113, 113, 0.3); }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .wrap { padding: 24px 18px 60px; }
+      .gear { top: 18px; right: 18px; width: 38px; height: 38px; }
+      .greeting { font-size: 34px; letter-spacing: -0.024em; }
+      .date-line { font-size: 14px; }
+      .sheet { padding: 24px; border-radius: 24px; margin-top: 36px; }
+      body {
+        background-image:
+          radial-gradient(ellipse 90% 35% at 50% -8%, rgba(62, 207, 142, 0.20) 0%, rgba(62, 207, 142, 0.06) 40%, transparent 70%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="gear" id="settingsBtn" aria-label="Settings">⚙</button>
+
+  <main class="wrap">
+
+    <h1 class="greeting" id="greeting">Welcome</h1>
+    <p class="date-line" id="dateLine"></p>
+
+    <section id="settingsSheet" class="sheet hidden">
+      <h3>Settings</h3>
+      <p class="sub">Sign in to sync your data across devices.</p>
+
+      <div class="status-row">
+        <span class="sync-dot" id="statusDot"></span>
+        <span id="statusText">Not connected</span>
+      </div>
+
+      <div class="settings-block" id="cloudConfigBlock">
+        <div class="settings-label">CONNECT SUPABASE</div>
+        <p class="sub">New here? <a href="./SETUP.md" target="_blank">Setup guide →</a></p>
+        <div class="field">
+          <label>Supabase URL</label>
+          <input id="cfg-url" placeholder="https://xxxx.supabase.co" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Publishable key</label>
+          <input id="cfg-key" placeholder="sb_publishable_… or eyJ…" autocomplete="off" />
+        </div>
+        <div class="actions">
+          <button class="btn-primary" id="saveCfgBtn">Save</button>
+          <button class="btn-neutral" id="closeSettingsBtn1">Close</button>
+        </div>
+      </div>
+
+      <div class="settings-block hidden" id="signInBlock">
+        <div class="settings-label">SIGN IN</div>
+        <p class="sub">Magic link, no password.</p>
+        <div class="field">
+          <label>Email</label>
+          <input id="signinEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="actions">
+          <button class="btn-primary" id="sendMagicBtn">Send magic link</button>
+          <button class="btn-neutral" id="clearCfgBtn">Disconnect</button>
+        </div>
+        <div id="magicMsg" style="margin-top:14px;font-size:12.5px;color:var(--text-3);line-height:1.5"></div>
+      </div>
+
+      <div class="settings-block hidden" id="signedInBlock">
+        <div class="settings-label">SIGNED IN</div>
+        <p class="sub">Signed in as <strong id="userEmail" style="color:var(--text);font-weight:500"></strong>.</p>
+        <div class="actions">
+          <button class="btn-neutral" id="signOutBtn">Sign out</button>
+          <button class="btn-neutral" id="closeSettingsBtn2">Close</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const CONFIG_KEY = 'ohwisey.supabase.config';
+    let supabase = null;
+    let session  = null;
+    let dateTickTimer = null;
+
+    window.OhWisey = {
+      get supabase() { return supabase; },
+      get userId()   { return session?.user?.id || null; },
+    };
+
+    const loadConfig  = () => { try { return JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null'); } catch (e) { return null; } };
+    const saveConfig  = (cfg) => localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    const clearConfig = () => localStorage.removeItem(CONFIG_KEY);
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    async function initCloud() {
+      const cfg = loadConfig();
+      if (!cfg?.url || !cfg?.anonKey) {
+        setSyncStatus('offline');
+        renderSettings();
+        return;
+      }
+      try {
+        supabase = createClient(cfg.url, cfg.anonKey, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        });
+        supabase.auth.onAuthStateChange((_e, sess) => {
+          session = sess;
+          if (sess) setSyncStatus('synced');
+          else setSyncStatus('configured');
+          renderSettings();
+          render();
+        });
+        const { data: { session: existing } } = await supabase.auth.getSession();
+        session = existing;
+        setSyncStatus(existing ? 'synced' : 'configured');
+      } catch (e) {
+        console.error('cloud init', e);
+        setSyncStatus('error');
+        toast('Connection error. Check URL and key.', true);
+      }
+      renderSettings();
+      render();
+    }
+
+    function setSyncStatus(s) {
+      const labels = {
+        offline:    'Not connected',
+        configured: 'Not signed in',
+        syncing:    'Syncing…',
+        synced:     `Signed in${session?.user?.email ? ' · ' + session.user.email : ''}`,
+        error:      'Connection error',
+      };
+      const cls = s === 'offline' ? '' : s;
+      const sDot = document.getElementById('statusDot');
+      if (sDot) sDot.className = 'sync-dot ' + cls;
+      const sText = document.getElementById('statusText');
+      if (sText) sText.textContent = labels[s] || '';
+    }
+
+    function toast(msg, isErr = false) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show' + (isErr ? ' error' : '');
+      setTimeout(() => el.className = 'toast' + (isErr ? ' error' : ''), 2600);
+    }
+
+    function firstNameFromEmail(email) {
+      if (!email) return '';
+      const local = String(email).split('@')[0];
+      const tokens = local.split(/[._\-+]/).filter(t => /^[a-z]+$/i.test(t));
+      let name = tokens.length ? tokens[0] : local.replace(/[^a-z]/gi, '');
+      if (!name) return '';
+      if (name.length > 8) name = name.slice(0, 8);
+      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    }
+    function greetingForHour(h) {
+      if (h >= 5  && h < 12) return 'Good morning';
+      if (h >= 12 && h < 17) return 'Good afternoon';
+      if (h >= 17 && h < 22) return 'Good evening';
+      return 'Good night';
+    }
+    function fmtFullDate() {
+      return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    function render() {
+      const greeting = document.getElementById('greeting');
+      const dateLine = document.getElementById('dateLine');
+      const hour = new Date().getHours();
+      const name = session?.user?.email ? firstNameFromEmail(session.user.email) : '';
+      greeting.textContent = `${greetingForHour(hour)}${name ? ', ' + name : ''}`;
+      dateLine.textContent = fmtFullDate();
+    }
+
+    function renderSettings() {
+      const cfg = loadConfig();
+      const cfgBlock      = document.getElementById('cloudConfigBlock');
+      const signInBlock   = document.getElementById('signInBlock');
+      const signedInBlock = document.getElementById('signedInBlock');
+      const hasCfg = !!(cfg?.url && cfg?.anonKey);
+      const hasSession = !!session;
+      cfgBlock.classList.toggle('hidden', hasCfg);
+      signInBlock.classList.toggle('hidden', !hasCfg || hasSession);
+      signedInBlock.classList.toggle('hidden', !hasSession);
+      if (hasSession) document.getElementById('userEmail').textContent = session.user.email || '';
+    }
+
+    function openSettings()  { document.getElementById('settingsSheet').classList.remove('hidden'); renderSettings(); }
+    function closeSettings() { document.getElementById('settingsSheet').classList.add('hidden'); }
+
+    async function handleSaveConfig() {
+      const url     = document.getElementById('cfg-url').value.trim();
+      const anonKey = document.getElementById('cfg-key').value.trim();
+      if (!url || !anonKey) { toast('Both fields required', true); return; }
+      saveConfig({ url, anonKey });
+      toast('Saved. Sign in next.');
+      await initCloud();
+    }
+    async function handleClearConfig() {
+      if (session && supabase) await supabase.auth.signOut();
+      clearConfig();
+      supabase = null; session = null;
+      setSyncStatus('offline');
+      renderSettings(); render();
+      toast('Disconnected.');
+    }
+    async function handleSendMagic() {
+      const email = document.getElementById('signinEmail').value.trim();
+      if (!email) { toast('Enter your email', true); return; }
+      const msg = document.getElementById('magicMsg');
+      const btn = document.getElementById('sendMagicBtn');
+      btn.disabled = true;
+      msg.textContent = 'Sending…';
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: window.location.origin + window.location.pathname }
+        });
+        if (error) throw error;
+        msg.innerHTML = `Check <strong style="color:var(--mint)">${escapeHtml(email)}</strong> for a magic link.`;
+      } catch (e) {
+        msg.textContent = 'Could not send: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    async function handleSignOut() {
+      if (supabase) await supabase.auth.signOut();
+      session = null;
+      setSyncStatus('configured');
+      renderSettings(); render();
+      toast('Signed out.');
+    }
+
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+    document.getElementById('closeSettingsBtn1').addEventListener('click', closeSettings);
+    document.getElementById('closeSettingsBtn2').addEventListener('click', closeSettings);
+    document.getElementById('saveCfgBtn').addEventListener('click', handleSaveConfig);
+    document.getElementById('clearCfgBtn').addEventListener('click', handleClearConfig);
+    document.getElementById('sendMagicBtn').addEventListener('click', handleSendMagic);
+    document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+
+    dateTickTimer = setInterval(() => render(), 5 * 60 * 1000);
+
+    render();
+    initCloud();
+  </script>
+</body>
+</html>
