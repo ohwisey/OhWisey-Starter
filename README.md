@@ -42,8 +42,9 @@ OhWisey.registerModule({
 `mount(container)` receives:
 - a `<section>` already in the DOM
 - `class="ohwisey-module"` + `data-module-id="<your id>"`
-- a **layout-only wrapper** — full-width within the 720px page column, with `overflow: hidden` for safety
+- a **layout-only wrapper** — full-width within the 720px page column
 - **no visual chrome**: no background, no border, no padding. The standalone owns its look. Use `--ohw-bg-card`, `--ohw-border`, `--ohw-radius` to match the dashboard's aesthetic if you want a card.
+- **no clipping**: the wrapper is `overflow: visible`, so expand animations, dropdowns, popovers, and tooltips that extend beyond the wrapper's bounding box render correctly. (Page-level horizontal bleed is still caught by `body { overflow-x: hidden }`, so you don't need to police that yourself.)
 
 ### Reading dashboard state
 
