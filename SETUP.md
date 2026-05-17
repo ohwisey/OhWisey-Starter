@@ -54,7 +54,25 @@ Project URL and key live on TWO different pages.
 ## Step 7: Add a standalone (optional)
 Empty by design. See the standalone's README for embed instructions.
 
-For SplitLog (workout tracker): https://github.com/ohwisey/splitlog
+For SplitLog (workout tracker, https://github.com/ohwisey/splitlog), paste this inside `<body>` before `</body>`:
+
+```html
+<section id="splitlog-root"></section>
+<script src="https://ohwisey.github.io/splitlog/splitlog.bundle.js"></script>
+<script>
+  (function mount() {
+    if (!window.OhWisey?.supabase) {
+      setTimeout(mount, 100);
+      return;
+    }
+    SplitLog.mount(document.getElementById('splitlog-root'), {
+      supabaseClient: window.OhWisey.supabase,
+      userId: window.OhWisey.userId,
+      mode: 'embed'
+    });
+  })();
+</script>
+```
 
 ## Troubleshooting
 - **"email rate limit exceeded"** → wait ~1 hour, or create a fresh Supabase project
