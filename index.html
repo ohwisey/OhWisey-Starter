@@ -4,6 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Dashboard</title>
+  <script>
+    (function () {
+      var ohw = window.OhWisey = window.OhWisey || {};
+      ohw.modules = ohw.modules || [];
+      ohw.ready   = ohw.ready   || false;
+      ohw.registerModule = function (config) {
+        if (ohw.ready && typeof ohw._mount === 'function') ohw._mount(config);
+        else ohw.modules.push(config);
+      };
+    })();
+  </script>
   <style>
     :root {
       --bg: #000;
@@ -30,6 +41,16 @@
       --radius-sm:    12px;
 
       --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+      /* Public API — standalones theme themselves via these */
+      --ohw-bg:       #000;
+      --ohw-bg-card:  rgba(20, 20, 22, 0.6);
+      --ohw-text:     rgba(255, 255, 255, 0.95);
+      --ohw-text-dim: rgba(255, 255, 255, 0.60);
+      --ohw-accent:   #3ecf8e;
+      --ohw-border:   rgba(255, 255, 255, 0.08);
+      --ohw-radius:   16px;
+      --ohw-font:     -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,22 +74,35 @@
       background-repeat: no-repeat;
       overflow-x: hidden;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
 
-    .wrap {
-      flex: 1;
-      width: 100%;
+    main {
       max-width: 720px;
       margin: 0 auto;
-      padding: 32px 24px 80px;
+      padding: 0 24px;
+    }
+
+    .greeting-block {
+      text-align: center;
+      padding-top: 96px;
+      margin-bottom: 64px;
+    }
+
+    #ohwisey-modules {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: relative;
+      gap: 32px;
+      align-items: stretch;
+      padding-bottom: 80px;
+    }
+
+    .ohwisey-module {
+      background: var(--ohw-bg-card);
+      border: 1px solid var(--ohw-border);
+      border-radius: var(--ohw-radius);
+      padding: 24px;
+      color: var(--ohw-text);
+      font-family: var(--ohw-font);
     }
 
     /* ── Gear (fixed top-right) ─────────────────────────────── */
@@ -119,7 +153,7 @@
     .sheet {
       width: 100%;
       max-width: 480px;
-      margin-top: 48px;
+      margin: 16px auto 80px;
       text-align: left;
       background: rgba(20, 20, 22, 0.78);
       backdrop-filter: blur(40px) saturate(180%);
@@ -268,11 +302,14 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 480px) {
-      .wrap { padding: 24px 18px 60px; }
+      main { padding: 0 18px; }
+      .greeting-block { padding-top: 56px; margin-bottom: 44px; }
+      #ohwisey-modules { gap: 24px; padding-bottom: 60px; }
+      .ohwisey-module { padding: 20px; }
       .gear { top: 18px; right: 18px; width: 38px; height: 38px; }
       .greeting { font-size: 34px; letter-spacing: -0.024em; }
       .date-line { font-size: 14px; }
-      .sheet { padding: 24px; border-radius: 24px; margin-top: 36px; }
+      .sheet { padding: 24px; border-radius: 24px; margin: 8px auto 60px; }
       body {
         background-image:
           radial-gradient(ellipse 90% 35% at 50% -8%, rgba(62, 207, 142, 0.20) 0%, rgba(62, 207, 142, 0.06) 40%, transparent 70%);
@@ -284,10 +321,14 @@
 
   <button class="gear" id="settingsBtn" aria-label="Settings">⚙</button>
 
-  <main class="wrap">
+  <main>
 
-    <h1 class="greeting" id="greeting">Welcome</h1>
-    <p class="date-line" id="dateLine"></p>
+    <header class="greeting-block">
+      <h1 class="greeting" id="greeting">Welcome</h1>
+      <p class="date-line" id="dateLine"></p>
+    </header>
+
+    <div id="ohwisey-modules"></div>
 
     <section id="settingsSheet" class="sheet hidden">
       <h3>Settings</h3>
@@ -361,10 +402,33 @@
     let session  = null;
     let dateTickTimer = null;
 
-    window.OhWisey = {
-      get supabase() { return supabase; },
-      get userId()   { return session?.user?.id || null; },
+    Object.defineProperties(window.OhWisey, {
+      supabase: { get() { return supabase; }, configurable: true },
+      userId:   { get() { return session?.user?.id || null; }, configurable: true },
+    });
+
+    window.OhWisey._mount = function (config) {
+      if (!config || typeof config.mount !== 'function' || !config.id) return;
+      const region = document.getElementById('ohwisey-modules');
+      if (!region) return;
+      if (region.querySelector(`[data-module-id="${CSS.escape(config.id)}"]`)) {
+        console.warn('[OhWisey] module already mounted:', config.id);
+        return;
+      }
+      const section = document.createElement('section');
+      section.className = 'ohwisey-module';
+      section.dataset.moduleId = config.id;
+      region.appendChild(section);
+      try { config.mount(section); }
+      catch (e) { console.error('[OhWisey] mount failed:', config.id, e); }
     };
+
+    function flushModuleQueue() {
+      window.OhWisey.ready = true;
+      const queued = window.OhWisey.modules.slice();
+      window.OhWisey.modules.length = 0;
+      for (const cfg of queued) window.OhWisey._mount(cfg);
+    }
 
     const loadConfig  = () => { try { return JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null'); } catch (e) { return null; } };
     const saveConfig  = (cfg) => localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
@@ -578,7 +642,7 @@
     dateTickTimer = setInterval(() => render(), 5 * 60 * 1000);
 
     render();
-    initCloud();
+    initCloud().then(flushModuleQueue);
   </script>
 </body>
 </html>

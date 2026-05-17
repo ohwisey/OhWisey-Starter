@@ -52,27 +52,17 @@ Project URL and key live on TWO different pages.
 6. You should land on your dashboard signed in
 
 ## Step 7: Add a standalone (optional)
-Empty by design. See the standalone's README for embed instructions.
+Empty by design. Each standalone is **one `<script src>` line**, pasted inside `<body>` just before `</body>`. The script registers itself with the dashboard, which handles layout, styling, and ordering.
 
-For SplitLog (workout tracker, https://github.com/ohwisey/splitlog), paste this inside `<body>` before `</body>`:
+The order of `<script src>` tags = the order modules appear on the page.
+
+Example — SplitLog (workout tracker, https://github.com/ohwisey/splitlog):
 
 ```html
-<section id="splitlog-root"></section>
 <script src="https://ohwisey.github.io/splitlog/splitlog.bundle.js"></script>
-<script>
-  (function mount() {
-    if (!window.OhWisey?.supabase) {
-      setTimeout(mount, 100);
-      return;
-    }
-    SplitLog.mount(document.getElementById('splitlog-root'), {
-      supabaseClient: window.OhWisey.supabase,
-      userId: window.OhWisey.userId,
-      mode: 'embed'
-    });
-  })();
-</script>
 ```
+
+To add more standalones, paste another `<script src="...">` line below it. No mount calls, no container divs, no glue code. See [Standalone Module Contract](./README.md#standalone-module-contract) for how to build your own.
 
 ## Troubleshooting
 - **"email rate limit exceeded"** → wait ~1 hour, or create a fresh Supabase project
