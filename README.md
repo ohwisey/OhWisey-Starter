@@ -42,8 +42,8 @@ OhWisey.registerModule({
 `mount(container)` receives:
 - a `<section>` already in the DOM
 - `class="ohwisey-module"` + `data-module-id="<your id>"`
-- pre-styled card (background, border, radius, padding)
-- full-width within the 720px page column
+- a **layout-only wrapper** — full-width within the 720px page column, with `overflow: hidden` for safety
+- **no visual chrome**: no background, no border, no padding. The standalone owns its look. Use `--ohw-bg-card`, `--ohw-border`, `--ohw-radius` to match the dashboard's aesthetic if you want a card.
 
 ### Reading dashboard state
 
