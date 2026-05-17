@@ -332,7 +332,17 @@
       <div class="settings-block hidden" id="signedInBlock">
         <div class="settings-label">SIGNED IN</div>
         <p class="sub">Signed in as <strong id="userEmail" style="color:var(--text);font-weight:500"></strong>.</p>
+
+        <div class="field">
+          <label>Display name</label>
+          <input id="displayNameInput" type="text" maxlength="50" placeholder="Your name" autocomplete="name" />
+        </div>
         <div class="actions">
+          <button class="btn-primary" id="saveDisplayNameBtn">Save</button>
+        </div>
+        <div id="displayNameMsg" style="margin-top:14px;font-size:12.5px;color:var(--text-3);line-height:1.5;min-height:1.2em"></div>
+
+        <div class="actions" style="margin-top:22px">
           <button class="btn-neutral" id="signOutBtn">Sign out</button>
           <button class="btn-neutral" id="closeSettingsBtn2">Close</button>
         </div>
@@ -419,7 +429,7 @@
     function displayName(user) {
       if (!user) return '';
       const meta = user.user_metadata || {};
-      const named = meta.name || meta.full_name || meta.display_name;
+      const named = meta.full_name || meta.name || meta.display_name;
       if (typeof named === 'string' && named.trim()) return named.trim().split(/\s+/)[0];
       return '';
     }
@@ -452,7 +462,14 @@
       cfgBlock.classList.toggle('hidden', hasCfg);
       signInBlock.classList.toggle('hidden', !hasCfg || hasSession);
       signedInBlock.classList.toggle('hidden', !hasSession);
-      if (hasSession) document.getElementById('userEmail').textContent = session.user.email || '';
+      if (hasSession) {
+        document.getElementById('userEmail').textContent = session.user.email || '';
+        const meta = session.user.user_metadata || {};
+        document.getElementById('displayNameInput').value = meta.full_name || meta.name || meta.display_name || '';
+        const msg = document.getElementById('displayNameMsg');
+        msg.textContent = '';
+        msg.style.color = 'var(--text-3)';
+      }
     }
 
     function openSettings()  { document.getElementById('settingsSheet').classList.remove('hidden'); renderSettings(); }
@@ -506,6 +523,41 @@
         btn.disabled = false;
       }
     }
+    async function handleSaveDisplayName() {
+      if (!supabase || !session) return;
+      const input = document.getElementById('displayNameInput');
+      const msg   = document.getElementById('displayNameMsg');
+      const btn   = document.getElementById('saveDisplayNameBtn');
+      const value = input.value.trim().slice(0, 50);
+      if (value && !/^[\p{L}\p{N} ]+$/u.test(value)) {
+        msg.textContent = 'Letters, numbers, and spaces only.';
+        msg.style.color = 'var(--red)';
+        return;
+      }
+      btn.disabled = true;
+      msg.textContent = 'Saving…';
+      msg.style.color = 'var(--text-3)';
+      try {
+        const { data, error } = await supabase.auth.updateUser({
+          data: { full_name: value || null }
+        });
+        if (error) throw error;
+        if (data?.user && session) session.user = data.user;
+        render();
+        msg.textContent = value ? 'Saved' : 'Cleared';
+        msg.style.color = 'var(--mint)';
+        setTimeout(() => {
+          msg.textContent = '';
+          msg.style.color = 'var(--text-3)';
+        }, 1600);
+      } catch (e) {
+        msg.textContent = e?.message || 'Save failed';
+        msg.style.color = 'var(--red)';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     async function handleSignOut() {
       if (supabase) await supabase.auth.signOut();
       session = null;
@@ -521,6 +573,7 @@
     document.getElementById('clearCfgBtn').addEventListener('click', handleClearConfig);
     document.getElementById('sendMagicBtn').addEventListener('click', handleSendMagic);
     document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+    document.getElementById('saveDisplayNameBtn').addEventListener('click', handleSaveDisplayName);
 
     dateTickTimer = setInterval(() => render(), 5 * 60 * 1000);
 
